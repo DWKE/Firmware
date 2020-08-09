@@ -10,7 +10,6 @@ typedef struct
     float v2;
     float r2;
     float h2;
-    float h;
 }TD_Controller;
 
 typedef struct
@@ -19,12 +18,10 @@ typedef struct
     float v2;
     float r0;
     float h0;
-    float h;
 }TD;
 
 typedef struct
 {
-    float h;
     float beta1;
     float beta2;
     float alpha;
@@ -38,7 +35,6 @@ typedef struct
 
 typedef struct
 {
-    float h;
     float beta1;
     float beta2;
     float u;
@@ -50,7 +46,6 @@ typedef struct
 
 typedef struct
 {
-    float h;
     float h1;
     float r1;
     float c;

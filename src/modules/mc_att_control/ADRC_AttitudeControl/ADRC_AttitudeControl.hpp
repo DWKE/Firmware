@@ -37,7 +37,7 @@ public:
 	 * @param yawspeed_feedforward [rad/s] yaw feed forward angular rate in world frame
 	 * @return [rad/s] body frame 3D angular rate setpoint vector to be executed by the rate controller
 	 */
-    matrix::Vector3f update(matrix::Quatf q, matrix::Quatf qd, const matrix::Vector3f rate, float dt, float yawspeed_feedforward);
+    matrix::Vector3f update(matrix::Quatf q, matrix::Quatf qd, float yawspeed_feedforward, float dt);
 
     /*****************************************************************************************/
 
@@ -45,7 +45,7 @@ public:
     void att_init(float dt);
     void att_reset(float h);
     matrix::Vector3f att_dis_comp(matrix::Vector2f in);
-    matrix::Vector3f att_control(matrix::Vector3f err, const  matrix::Vector3f gyr, float dt);
+    matrix::Vector3f att_control(matrix::Vector3f err, float dt);
     void add_observer_update(const float gyr[3], float bth);
 
     /***************************************************************************************/

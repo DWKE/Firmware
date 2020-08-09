@@ -177,27 +177,12 @@ Vector3f ADRC_AttitudeControl::att_dis_comp(Vector2f in)
 
     return out;
 }
-Vector3f ADRC_AttitudeControl::att_control(Vector3f err, const Vector3f gyr, float dt)
+Vector3f ADRC_AttitudeControl::att_control(Vector3f err, float dt)
 {
     Vector3f sp_rate;
-    float rate_err[3];
-    Vector2f u0;
 
     sp_rate(0) = td_control(&_td_controller[0], err(0), dt);
     sp_rate(1) = td_control(&_td_controller[1], err(1), dt);
-    rate_err[0] = sp_rate(0) - gyr(0);
-    rate_err[1] = sp_rate(1) - gyr(1);
-
-    td(&_td[0], rate_err[0], dt);
-    td(&_td[1], rate_err[1], dt);
-
-    u0(0) = nlsef(&_nlsef[0], rate_err[0], _td[0].v2)/_leso[0].b0;
-    u0(1) = nlsef(&_nlsef[1], rate_err[1], _td[1].v2)/_leso[1].b0;
-
-    int_i[0] += rate_err[0] * _nlsef_ki * _nlsef[0].h;
-    int_i[1] += rate_err[1] * _nlsef_ki * _nlsef[1].h;
-
-
 
     return sp_rate;
 }
@@ -206,7 +191,7 @@ void ADRC_AttitudeControl::add_observer_update(const float gyr[3], float bth)
 
 }
 
-matrix::Vector3f ADRC_AttitudeControl::update(matrix::Quatf q, matrix::Quatf qd, const matrix::Vector3f rate, float dt, const float yawspeed_feedforward)
+matrix::Vector3f ADRC_AttitudeControl::update(matrix::Quatf q, matrix::Quatf qd, const float yawspeed_feedforward, float dt)
 {
     // ensure input quaternions are exactly normalized because acosf(1.00001) == NaN
     q.normalize();
@@ -246,7 +231,8 @@ matrix::Vector3f ADRC_AttitudeControl::update(matrix::Quatf q, matrix::Quatf qd,
 
     // calculate angular rates setpoint
 //    matrix::Vector3f rate_setpoint = eq.emult(_proportional_gain);
-    matrix::Vector3f rate_setpoint = att_control(eq, rate, dt);
+    matrix::Vector3f rate_setpoint = att_control(eq, dt);
+    rate_setpoint(2) = eq(2) * _proportional_gain(2);
     PX4_INFO("%f, %f, %f", (double)rate_setpoint(0), (double)rate_setpoint(1), (double)rate_setpoint(2));
 
 
@@ -270,16 +256,16 @@ matrix::Vector3f ADRC_AttitudeControl::update(matrix::Quatf q, matrix::Quatf qd,
 
 /****************************************************************************************************************/
 
-//void ADRC_AttitudeControl::setProportionalGain(const matrix::Vector3f &proportional_gain)
-//{
-//	_proportional_gain = proportional_gain;
+void ADRC_AttitudeControl::setProportionalGain(const matrix::Vector3f &proportional_gain)
+{
+    _proportional_gain = proportional_gain;
 
-//	// prepare yaw weight from the ratio between roll/pitch and yaw gains
-//	const float roll_pitch_gain = (proportional_gain(0) + proportional_gain(1)) / 2.f;
-//	_yaw_w = math::constrain(proportional_gain(2) / roll_pitch_gain, 0.f, 1.f);
+    // prepare yaw weight from the ratio between roll/pitch and yaw gains
+    const float roll_pitch_gain = (proportional_gain(0) + proportional_gain(1)) / 2.f;
+    _yaw_w = math::constrain(proportional_gain(2) / roll_pitch_gain, 0.f, 1.f);
 
-//	_proportional_gain(2) = roll_pitch_gain;
-//}
+    _proportional_gain(2) = roll_pitch_gain;
+}
 
 //matrix::Vector3f ADRC_AttitudeControl::update(matrix::Quatf q, matrix::Quatf qd, const float yawspeed_feedforward)
 //{
