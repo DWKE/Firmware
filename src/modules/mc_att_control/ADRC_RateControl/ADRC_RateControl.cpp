@@ -47,16 +47,6 @@
 using namespace matrix;
 using namespace adrc;
 
-ADRC_RateControl::ADRC_RateControl()
-{
-    _td.push_back(TD());
-    _td.push_back(TD());
-    _leso.push_back(LESO());
-    _leso.push_back(LESO());
-    _nlsef.push_back(NLSEF());
-    _nlsef.push_back(NLSEF());
-}
-
 void ADRC_RateControl::setGains(const Vector3f &P, const Vector3f &I, const Vector3f &D,
                                 float td_r0, float leso_w, float nlsef_r1, float nlsef_h1, float nlsef_c, float gamma, float nlsef_ki)
 {
@@ -74,25 +64,25 @@ void ADRC_RateControl::setGains(const Vector3f &P, const Vector3f &I, const Vect
 
 void ADRC_RateControl::rate_init(float h)
 {
-    td_init(&_td[0], _td_r0, h);
-    td_init(&_td[1], _td_r0, h);
-    leso_init(&_leso[0], _leso_w, 400);
-    leso_init(&_leso[1], _leso_w, 400);
-    nlsef_init(&_nlsef[0], _nlsef_r1, _nlsef_h1*h, _nlsef_c);
-    nlsef_init(&_nlsef[1], _nlsef_r1, _nlsef_h1*h, _nlsef_c);
+    td_init(&_td_roll, _td_r0, h);
+    td_init(&_td_pitch, _td_r0, h);
+    leso_init(&_leso_roll, _leso_w, 400);
+    leso_init(&_leso_pitch, _leso_w, 400);
+    nlsef_init(&_nlsef_roll, _nlsef_r1, _nlsef_h1*h, _nlsef_c);
+    nlsef_init(&_nlsef_pitch, _nlsef_r1, _nlsef_h1*h, _nlsef_c);
 }
 
 Vector3f ADRC_RateControl::att_dis_comp(Vector2f in)
 {
     Vector3f out;
-    out(0) = in(0) - _gamma * _leso[0].z2 / _leso[0].b0;
-    out(1) = in(1) - _gamma * _leso[1].z2 / _leso[1].b0;
+    out(0) = in(0) - _gamma * _leso_roll.z2 / _leso_roll.b0;
+    out(1) = in(1) - _gamma * _leso_pitch.z2 / _leso_pitch.b0;
 
     out(0) = math::constrain(out(0), -0.5f, 0.5f);
     out(1) = math::constrain(out(1), -0.5f, 0.5f);
 
-    _leso[0].u = out(0);
-    _leso[1].u = out(1);
+    _leso_roll.u = out(0);
+    _leso_pitch.u = out(1);
 
     return out;
 }
@@ -105,11 +95,11 @@ Vector3f ADRC_RateControl::rate_control(const Vector3f rate, const Vector3f rate
 
     rate_err = rate_sp - rate;
 
-    td(&_td[0], rate_err(0), dt);
-    td(&_td[1], rate_err(1), dt);
+    td(&_td_roll, rate_err(0), dt);
+    td(&_td_pitch, rate_err(1), dt);
 
-    u0(0) = nlsef(&_nlsef[0], rate_err(0), _td[0].v2) / _leso[0].b0;
-    u0(1) = nlsef(&_nlsef[1], rate_err(1), _td[1].v2) / _leso[1].b0;
+    u0(0) = nlsef(&_nlsef_roll, rate_err(0), _td_roll.v2) / _leso_roll.b0;
+    u0(1) = nlsef(&_nlsef_pitch, rate_err(1), _td_pitch.v2) / _leso_pitch.b0;
 
     u0(0) = math::constrain(u0(0), -0.5f, 0.5f);
     u0(1) = math::constrain(u0(1), -0.5f, 0.5f);
@@ -130,7 +120,7 @@ void ADRC_RateControl::setDTermCutoff(const float loop_rate, const float cutoff,
 
 void ADRC_RateControl::setSaturationStatus(const MultirotorMixer::saturation_status &status)
 {
-	_mixer_saturation_positive[0] = status.flags.roll_pos;
+    _mixer_saturation_positive[0] = status.flags.roll_pos;
 	_mixer_saturation_positive[1] = status.flags.pitch_pos;
 	_mixer_saturation_positive[2] = status.flags.yaw_pos;
 	_mixer_saturation_negative[0] = status.flags.roll_neg;
@@ -155,7 +145,7 @@ Vector3f ADRC_RateControl::update(const Vector3f rate, const Vector3f rate_sp, c
     Vector3f torque = _gain_p.emult(rate_error) + _rate_int - _gain_d.emult(rate_d) + _gain_ff.emult(rate_sp);
     torque += rate_control(rate, rate_sp, dt);
 //    torque(2) = _gain_p(2)*rate_error(2) + _rate_int(2) - _gain_d(2)*rate_d(2) + _gain_ff(2)*rate_sp(2);
-    PX4_INFO("%f, %f, %f", (double)torque(0), (double)torque(1), (double)torque(2));
+//    PX4_INFO("%f, %f, %f", (double)torque(0), (double)torque(1), (double)torque(2));
 
 	_rate_prev = rate;
 	_rate_prev_filtered = rate_filtered;

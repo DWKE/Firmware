@@ -45,14 +45,13 @@
 #include <lib/mixer/mixer.h>
 #include <uORB/topics/rate_ctrl_status.h>
 
-#include <iostream>
 #include <vector>
 #include <adrc/adrc.hpp>
 
 class ADRC_RateControl
 {
 public:
-    ADRC_RateControl();
+    ADRC_RateControl() = default;
     ~ADRC_RateControl() = default;
 
 	/**
@@ -140,9 +139,12 @@ private:
 	bool _mixer_saturation_positive[3] {};
 	bool _mixer_saturation_negative[3] {};
 
-    std::vector<adrc::TD> _td;
-    std::vector<adrc::NLSEF> _nlsef;
-    std::vector<adrc::LESO> _leso;
+    adrc::TD _td_roll;
+    adrc::TD _td_pitch;
+    adrc::NLSEF _nlsef_roll;
+    adrc::NLSEF _nlsef_pitch;
+    adrc::LESO _leso_roll;
+    adrc::LESO _leso_pitch;
 
     matrix::Vector3f att_dis_comp(matrix::Vector2f in);
     matrix::Vector3f rate_control(const matrix::Vector3f rate, const matrix::Vector3f rate_sp, const float dt);

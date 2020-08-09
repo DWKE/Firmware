@@ -7,7 +7,6 @@
 
 #include <matrix/matrix/math.hpp>
 #include <adrc/adrc.hpp>
-#include <iostream>
 #include <vector>
 
 class ADRC_AttitudeControl
