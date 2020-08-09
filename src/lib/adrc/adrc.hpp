@@ -69,7 +69,7 @@ inline float fhan(float v1, float v2, float r0, float h0)
 inline float fal(float e, float alpha, float delta)
 {
     if(fabsf(e) <= delta){
-        return e / (pow(delta, 1.0f-alpha));
+        return e / float(pow(delta, 1.0f-alpha));
     }else{
         return pow(fabsf(e), alpha) * signNoZero(e);
     }

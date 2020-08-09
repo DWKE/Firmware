@@ -7,12 +7,11 @@
 
 #include <matrix/matrix/math.hpp>
 #include <adrc/adrc.hpp>
-#include <vector>
 
 class ADRC_AttitudeControl
 {
 public:
-    ADRC_AttitudeControl();
+    ADRC_AttitudeControl() = default;
     ~ADRC_AttitudeControl() = default;
 
 	/**
@@ -54,7 +53,8 @@ private:
     float _td_control_r2;
     float _td_control_h2;
 
-    std::vector<adrc::TD_Controller> _td_controller;
+    adrc::TD_Controller _td_controller_roll;
+    adrc::TD_Controller _td_controller_pitch;
 
     float int_i[2] = {0.0f, 0.0f};
 

@@ -14,12 +14,6 @@
 using namespace matrix;
 using namespace adrc;
 
-ADRC_AttitudeControl::ADRC_AttitudeControl()
-{
-    _td_controller.push_back(TD_Controller());
-    _td_controller.push_back(TD_Controller());
-}
-
 void ADRC_AttitudeControl::setGains(float td_control_r2, float td_control_h2)
 {
     _td_control_r2 = td_control_r2;
@@ -28,16 +22,16 @@ void ADRC_AttitudeControl::setGains(float td_control_r2, float td_control_h2)
 
 void ADRC_AttitudeControl::att_init(float h)
 {
-    td_control_init(&_td_controller[0], _td_control_r2, _td_control_h2*h);
-    td_control_init(&_td_controller[1], _td_control_r2, _td_control_h2*h);
+    td_control_init(&_td_controller_roll, _td_control_r2, _td_control_h2*h);
+    td_control_init(&_td_controller_pitch, _td_control_r2, _td_control_h2*h);
 }
 
 Vector3f ADRC_AttitudeControl::att_control(Vector3f err, float dt)
 {
     Vector3f sp_rate;
 
-    sp_rate(0) = td_control(&_td_controller[0], err(0), dt);
-    sp_rate(1) = td_control(&_td_controller[1], err(1), dt);
+    sp_rate(0) = td_control(&_td_controller_roll, err(0), dt);
+    sp_rate(1) = td_control(&_td_controller_pitch, err(1), dt);
 
     return sp_rate;
 }

@@ -45,7 +45,6 @@
 #include <lib/mixer/mixer.h>
 #include <uORB/topics/rate_ctrl_status.h>
 
-#include <vector>
 #include <adrc/adrc.hpp>
 
 class ADRC_RateControl
