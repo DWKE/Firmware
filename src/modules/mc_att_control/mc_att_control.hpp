@@ -61,7 +61,7 @@
 #include <vtol_att_control/vtol_type.h>
 
 #include <ADRC_AttitudeControl.hpp>
-#include <RateControl.hpp>
+#include <ADRC_RateControl.hpp>
 
 /**
  * Multicopter attitude control app start / stop handling function
@@ -136,7 +136,7 @@ private:
 	void		control_attitude_rates(float dt, const matrix::Vector3f &rates);
 
     ADRC_AttitudeControl _attitude_control; ///< class for attitude control calculations
-	RateControl _rate_control; ///< class for rate control calculations
+    ADRC_RateControl _rate_control; ///< class for rate control calculations
 
 	uORB::Subscription _v_att_sub{ORB_ID(vehicle_attitude)};			/**< vehicle attitude subscription */
 	uORB::Subscription _v_att_sp_sub{ORB_ID(vehicle_attitude_setpoint)};		/**< vehicle attitude setpoint subscription */

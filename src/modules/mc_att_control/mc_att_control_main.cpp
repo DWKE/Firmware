@@ -70,7 +70,6 @@ MulticopterAttitudeControl::MulticopterAttitudeControl() :
 	_att_control.zero();
 
 	parameters_updated();
-    _attitude_control.att_init(0.02f);
 }
 
 MulticopterAttitudeControl::~MulticopterAttitudeControl()
@@ -95,7 +94,8 @@ MulticopterAttitudeControl::parameters_updated()
 	// Store some of the parameters in a more convenient way & precompute often-used values
     _attitude_control.setProportionalGain(Vector3f(_param_mc_roll_p.get(), _param_mc_pitch_p.get(), _param_mc_yaw_p.get()));
     // void setGains(float td_control_r2, float td_control_h2, float td_r0, float leso_w, float nlsef_r1, float nlsef_h1, float nlsef_c, float gamma, float nlsef_ki);
-    _attitude_control.setGains(25.0f, 20.0f, 1000.0f, 120.0f, 100.0f, 50.0f, 0.01f, 0.50f, 0.05f);
+    _attitude_control.setGains(25.0f, 20.0f);
+    _attitude_control.att_init(0.02f);
 
 	// rate control parameters
 	// The controller gain K is used to convert the parallel (P + I/s + sD) form
@@ -104,12 +104,14 @@ MulticopterAttitudeControl::parameters_updated()
 	_rate_control.setGains(
 		rate_k.emult(Vector3f(_param_mc_rollrate_p.get(), _param_mc_pitchrate_p.get(), _param_mc_yawrate_p.get())),
 		rate_k.emult(Vector3f(_param_mc_rollrate_i.get(), _param_mc_pitchrate_i.get(), _param_mc_yawrate_i.get())),
-		rate_k.emult(Vector3f(_param_mc_rollrate_d.get(), _param_mc_pitchrate_d.get(), _param_mc_yawrate_d.get())));
+        rate_k.emult(Vector3f(_param_mc_rollrate_d.get(), _param_mc_pitchrate_d.get(), _param_mc_yawrate_d.get())),
+                1000.0f, 120.0f, 100.0f, 50.0f, 0.01f, 0.50f, 0.05f);
 	_rate_control.setIntegratorLimit(
 		Vector3f(_param_mc_rr_int_lim.get(), _param_mc_pr_int_lim.get(), _param_mc_yr_int_lim.get()));
 	_rate_control.setDTermCutoff(_loop_update_rate_hz, _param_mc_dterm_cutoff.get(), false);
 	_rate_control.setFeedForwardGain(
 		Vector3f(_param_mc_rollrate_ff.get(), _param_mc_pitchrate_ff.get(), _param_mc_yawrate_ff.get()));
+    _rate_control.rate_init(0.02f);
 
 	// angular rate limits
 	using math::radians;

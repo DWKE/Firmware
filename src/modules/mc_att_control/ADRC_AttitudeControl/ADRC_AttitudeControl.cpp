@@ -18,53 +18,20 @@ ADRC_AttitudeControl::ADRC_AttitudeControl()
 {
     _td_controller.push_back(TD_Controller());
     _td_controller.push_back(TD_Controller());
-    _td.push_back(TD());
-    _td.push_back(TD());
-    _nlsef.push_back(NLSEF());
-    _nlsef.push_back(NLSEF());
-    _leso.push_back(LESO());
-    _leso.push_back(LESO());
 }
 
-void ADRC_AttitudeControl::setGains(float td_control_r2, float td_control_h2, float td_r0, float leso_w,
-                                    float nlsef_r1, float nlsef_h1, float nlsef_c, float gamma, float nlsef_ki)
+void ADRC_AttitudeControl::setGains(float td_control_r2, float td_control_h2)
 {
     _td_control_r2 = td_control_r2;
     _td_control_h2 = td_control_h2;
-    _td_r0 = td_r0;
-    _leso_w = leso_w;
-    _nlsef_r1 = nlsef_r1;
-    _nlsef_h1 = nlsef_h1;
-    _nlsef_c = nlsef_c;
-    _gamma = gamma;
-    _nlsef_ki = nlsef_ki;
 }
 
 void ADRC_AttitudeControl::att_init(float h)
 {
     td_control_init(&_td_controller[0], _td_control_r2, _td_control_h2*h);
     td_control_init(&_td_controller[1], _td_control_r2, _td_control_h2*h);
-    td_init(&_td[0], _td_r0, h);
-    td_init(&_td[1], _td_r0, h);
-    leso_init(&_leso[0], _leso_w, 400);
-    leso_init(&_leso[1], _leso_w, 400);
-    nlsef_init(&_nlsef[0], _nlsef_r1, _nlsef_h1*h, _nlsef_c);
-    nlsef_init(&_nlsef[1], _nlsef_r1, _nlsef_h1*h, _nlsef_c);
-
-    int_i[0] = int_i[1] = 0.0f;
 }
 
-Vector3f ADRC_AttitudeControl::att_dis_comp(Vector2f in)
-{
-    Vector3f out;
-    out(0) = in(0) = _gamma * _leso[0].z2 / _leso[0].b0;
-    out(1) = in(1) = _gamma * _leso[1].z2 / _leso[1].b0;
-
-    _leso[0].u = out(0);
-    _leso[1].u = out(1);
-
-    return out;
-}
 Vector3f ADRC_AttitudeControl::att_control(Vector3f err, float dt)
 {
     Vector3f sp_rate;
@@ -111,13 +78,12 @@ matrix::Vector3f ADRC_AttitudeControl::update(matrix::Quatf q, matrix::Quatf qd,
     // using sin(alpha/2) scaled rotation axis as attitude error (see quaternion definition by axis angle)
     // also taking care of the antipodal unit quaternion ambiguity
     const Vector3f eq = 2.f * math::signNoZero(qe(0)) * qe.imag();
-    //PX4_INFO("%f, %f, %f", (double)eq(0), (double)eq(1), (double)eq(2));
 
     // calculate angular rates setpoint
 //    matrix::Vector3f rate_setpoint = eq.emult(_proportional_gain);
     matrix::Vector3f rate_setpoint = att_control(eq, dt);
     rate_setpoint(2) = eq(2) * _proportional_gain(2);
-    PX4_INFO("%f, %f, %f", (double)rate_setpoint(0), (double)rate_setpoint(1), (double)rate_setpoint(2));
+//    PX4_INFO("%f, %f, %f", (double)rate_setpoint(0), (double)rate_setpoint(1), (double)rate_setpoint(2));
 
 
     // Feed forward the yaw setpoint rate.

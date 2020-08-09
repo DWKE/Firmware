@@ -39,9 +39,8 @@ public:
 
     /*****************************************************************************************/
 
-    void setGains(float td_control_r2, float td_control_h2, float td_r0, float leso_w, float nlsef_r1, float nlsef_h1, float nlsef_c, float gamma, float nlsef_ki);
+    void setGains(float td_control_r2, float td_control_h2);
     void att_init(float dt);
-    matrix::Vector3f att_dis_comp(matrix::Vector2f in);
     matrix::Vector3f att_control(matrix::Vector3f err, float dt);
 
     /***************************************************************************************/
@@ -55,18 +54,8 @@ private:
 
     float _td_control_r2;
     float _td_control_h2;
-    float _td_r0;
-    float _leso_w;
-    float _nlsef_r1;
-    float _nlsef_h1;
-    float _nlsef_c;
-    float _gamma;
-    float _nlsef_ki;
 
     std::vector<adrc::TD_Controller> _td_controller;
-    std::vector<adrc::TD> _td;
-    std::vector<adrc::NLSEF> _nlsef;
-    std::vector<adrc::LESO> _leso;
 
     float int_i[2] = {0.0f, 0.0f};
 

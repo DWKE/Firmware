@@ -1,6 +1,6 @@
 ############################################################################
 #
-#   Copyright (c) 2015 PX4 Development Team. All rights reserved.
+#   Copyright (c) 2019 PX4 Development Team. All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -31,22 +31,14 @@
 #
 ############################################################################
 
-add_subdirectory(ADRC_AttitudeControl)
-add_subdirectory(ADRC_RateControl)
+px4_add_library(ADRC_RateControl
+        ADRC_RateControl.cpp
+)
+target_include_directories(ADRC_RateControl
+	PUBLIC
+	${CMAKE_CURRENT_SOURCE_DIR}
+)
 
-px4_add_module(
-	MODULE modules__mc_att_control
-	MAIN mc_att_control
-	STACK_MAX 3500
-	COMPILE_FLAGS
-	SRCS
-		mc_att_control_main.cpp
-	DEPENDS
-		circuit_breaker
-		conversion
-		mathlib
-                adrc
-                ADRC_AttitudeControl
-                ADRC_RateControl
-		px4_work_queue
-	)
+target_link_libraries(ADRC_RateControl PRIVATE mathlib)
+
+px4_add_unit_gtest(SRC ADRC_RateControlTest.cpp LINKLIBS ADRC_RateControl)
