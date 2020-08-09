@@ -31,7 +31,7 @@
 #
 ############################################################################
 
-add_subdirectory(AttitudeControl)
+add_subdirectory(ADRC_AttitudeControl)
 add_subdirectory(RateControl)
 
 px4_add_module(
@@ -45,7 +45,8 @@ px4_add_module(
 		circuit_breaker
 		conversion
 		mathlib
-		AttitudeControl
+                adrc
+                ADRC_AttitudeControl
 		RateControl
 		px4_work_queue
 	)

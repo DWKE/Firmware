@@ -60,7 +60,7 @@
 #include <uORB/topics/landing_gear.h>
 #include <vtol_att_control/vtol_type.h>
 
-#include <AttitudeControl.hpp>
+#include <ADRC_AttitudeControl.hpp>
 #include <RateControl.hpp>
 
 /**
@@ -128,14 +128,14 @@ private:
 	/**
 	 * Attitude controller.
 	 */
-	void		control_attitude();
+    void		control_attitude(float dt, const matrix::Vector3f &rates);
 
 	/**
 	 * Attitude rates controller.
 	 */
 	void		control_attitude_rates(float dt, const matrix::Vector3f &rates);
 
-	AttitudeControl _attitude_control; ///< class for attitude control calculations
+    ADRC_AttitudeControl _attitude_control; ///< class for attitude control calculations
 	RateControl _rate_control; ///< class for rate control calculations
 
 	uORB::Subscription _v_att_sub{ORB_ID(vehicle_attitude)};			/**< vehicle attitude subscription */

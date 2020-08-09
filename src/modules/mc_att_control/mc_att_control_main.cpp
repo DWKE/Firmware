@@ -70,6 +70,7 @@ MulticopterAttitudeControl::MulticopterAttitudeControl() :
 	_att_control.zero();
 
 	parameters_updated();
+    _attitude_control.att_init(0.02f);
 }
 
 MulticopterAttitudeControl::~MulticopterAttitudeControl()
@@ -92,7 +93,9 @@ void
 MulticopterAttitudeControl::parameters_updated()
 {
 	// Store some of the parameters in a more convenient way & precompute often-used values
-	_attitude_control.setProportionalGain(Vector3f(_param_mc_roll_p.get(), _param_mc_pitch_p.get(), _param_mc_yaw_p.get()));
+    //_attitude_control.setProportionalGain(Vector3f(_param_mc_roll_p.get(), _param_mc_pitch_p.get(), _param_mc_yaw_p.get()));
+    // void setGains(float td_control_r2, float td_control_h2, float td_r0, float leso_w, float nlsef_r1, float nlsef_h1, float nlsef_c, float gamma, float nlsef_ki);
+    _attitude_control.setGains(25.0f, 20.0f, 1000.0f, 120.0f, 100.0f, 50.0f, 0.01f, 0.50f, 0.05f);
 
 	// rate control parameters
 	// The controller gain K is used to convert the parallel (P + I/s + sD) form
@@ -346,7 +349,7 @@ MulticopterAttitudeControl::generate_attitude_setpoint(float dt, bool reset_yaw_
  * Output: '_rates_sp' vector, '_thrust_sp'
  */
 void
-MulticopterAttitudeControl::control_attitude()
+MulticopterAttitudeControl::control_attitude(float dt, const Vector3f &rates)
 {
 	_v_att_sp_sub.update(&_v_att_sp);
 
@@ -359,7 +362,7 @@ MulticopterAttitudeControl::control_attitude()
 	// physical thrust axis is the negative of body z axis
 	_thrust_sp = -_v_att_sp.thrust_body[2];
 
-	_rates_sp = _attitude_control.update(Quatf(_v_att.q), Quatf(_v_att_sp.q_d), _v_att_sp.yaw_sp_move_rate);
+    _rates_sp = _attitude_control.update(Quatf(_v_att.q), Quatf(_v_att_sp.q_d), rates, dt, _v_att_sp.yaw_sp_move_rate);
 }
 
 /*
@@ -377,7 +380,7 @@ MulticopterAttitudeControl::control_attitude_rates(float dt, const Vector3f &rat
 
 	const bool landed = _vehicle_land_detected.maybe_landed || _vehicle_land_detected.landed;
 	_rate_control.setSaturationStatus(_saturation_status);
-	_att_control = _rate_control.update(rates, _rates_sp, dt, landed);
+    _att_control = _rate_control.update(rates, _rates_sp, dt, landed);
 }
 
 void
@@ -502,7 +505,7 @@ MulticopterAttitudeControl::Run()
 					attitude_setpoint_generated = true;
 				}
 
-				control_attitude();
+                control_attitude(dt, rates);
 
 				if (_v_control_mode.flag_control_yawrate_override_enabled) {
 					/* Yaw rate override enabled, overwrite the yaw setpoint */
