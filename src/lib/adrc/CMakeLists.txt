@@ -1,1 +1,1 @@
-px4_add_library(adrc adrc.cpp)
+px4_add_library(adrc adrc.hpp)

@@ -10,8 +10,6 @@
 #include <iostream>
 #include <vector>
 
-using namespace adrc;
-
 class ADRC_AttitudeControl
 {
 public:
@@ -43,10 +41,8 @@ public:
 
     void setGains(float td_control_r2, float td_control_h2, float td_r0, float leso_w, float nlsef_r1, float nlsef_h1, float nlsef_c, float gamma, float nlsef_ki);
     void att_init(float dt);
-    void att_reset(float h);
     matrix::Vector3f att_dis_comp(matrix::Vector2f in);
     matrix::Vector3f att_control(matrix::Vector3f err, float dt);
-    void add_observer_update(const float gyr[3], float bth);
 
     /***************************************************************************************/
 
@@ -67,26 +63,12 @@ private:
     float _gamma;
     float _nlsef_ki;
 
-    std::vector<TD_Controller> _td_controller;
-    std::vector<TD> _td;
-    std::vector<NLSEF> _nlsef;
-    std::vector<LESO> _leso;
+    std::vector<adrc::TD_Controller> _td_controller;
+    std::vector<adrc::TD> _td;
+    std::vector<adrc::NLSEF> _nlsef;
+    std::vector<adrc::LESO> _leso;
 
     float int_i[2] = {0.0f, 0.0f};
-
-    float sign(float val);
-    float fhan(float v1, float v2, float r0, float h0);
-    float fal(float e, float alpha, float delta);
-    void td_init(TD* td_t, float r0, float h0);
-    void td(TD* td, float v, float dt);
-    void td_control_init(TD_Controller* td_controller, float r2, float h2);
-    float td_control(TD_Controller* td_controller, float err, float dt);
-    void eso_init(ESO* eso_t, float beta1, float beta2, float alpha, float delta, float b0);
-    void eso(ESO* eso_t, float y, float dt);
-    void leso_init(LESO* leso_t, float w, float b0);
-    void leso(LESO* leso_t, float y, float dt);
-    void nlsef_init(NLSEF* nlsef_t, float r1, float h1, float c);
-    float nlsef(NLSEF* nlsef_t, float e1, float e2);
 
     /*****************************************************************************************/
 };

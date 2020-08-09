@@ -349,7 +349,7 @@ MulticopterAttitudeControl::generate_attitude_setpoint(float dt, bool reset_yaw_
  * Output: '_rates_sp' vector, '_thrust_sp'
  */
 void
-MulticopterAttitudeControl::control_attitude(float dt, const Vector3f &rates)
+MulticopterAttitudeControl::control_attitude(float dt)
 {
 	_v_att_sp_sub.update(&_v_att_sp);
 
@@ -505,7 +505,7 @@ MulticopterAttitudeControl::Run()
 					attitude_setpoint_generated = true;
 				}
 
-                control_attitude(dt, rates);
+                control_attitude(dt);
 
 				if (_v_control_mode.flag_control_yawrate_override_enabled) {
 					/* Yaw rate override enabled, overwrite the yaw setpoint */

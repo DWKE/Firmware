@@ -53,118 +53,6 @@ void ADRC_AttitudeControl::att_init(float h)
 
     int_i[0] = int_i[1] = 0.0f;
 }
-void ADRC_AttitudeControl::att_reset(float h)
-{
-
-}
-
-float ADRC_AttitudeControl::sign(float val)
-{
-    if(val >= 0.0f)
-        return 1.0f;
-    else
-        return -1.0f;
-}
-
-float ADRC_AttitudeControl::fhan(float v1, float v2, float r0, float h0)
-{
-    float d = h0 * h0 * r0;
-    float a0 = h0 * v2;
-    float y = v1 + a0;
-    float a1 = sqrt(d*(d + 8.0f*fabsf(y)));
-    float a2 = a0 + sign(y)*(a1-d)*0.5f;
-    float sy = (sign(y+d) - sign(y-d))*0.5f;
-    float a = (a0 + y - a2)*sy + a2;
-    float sa = (sign(a+d) - sign(a-d))*0.5f;
-
-    return -r0*(a/d - sign(a))*sa - r0*sign(a);
-}
-
-float ADRC_AttitudeControl::fal(float e, float alpha, float delta)
-{
-    if(fabsf(e) <= delta){
-        return e / (pow(delta, 1.0f-alpha));
-    }else{
-        return pow(fabsf(e), alpha) * sign(e);
-    }
-}
-
-void ADRC_AttitudeControl::td_init(TD* td_t, float r0, float h0)
-{
-    td_t->r0 = r0;
-    td_t->h0 = h0;
-    td_t->v1 = td_t->v2 = 0.0f;
-}
-void ADRC_AttitudeControl::td(TD* td_t, float v, float dt)
-{
-    float fv = fhan(td_t->v1 - v, td_t->v2, td_t->r0, td_t->h0);
-
-    td_t->v1 += dt * td_t->v2;
-    td_t->v2 += dt * fv;
-}
-void ADRC_AttitudeControl::td_control_init(TD_Controller* td_controller, float r2, float h2)
-{
-    td_controller->v1 = 0.0f;
-    td_controller->v2 = 0.0f;
-    td_controller->r2 = r2;
-    td_controller->h2 = h2;
-}
-float ADRC_AttitudeControl::td_control(TD_Controller* td_controller, float err, float dt)
-{
-    float fv = fhan(-err, td_controller->v2, td_controller->r2, td_controller->h2);
-    td_controller->v1 += dt * td_controller->v2;
-    td_controller->v2 += dt * fv;
-
-    return td_controller->v2;
-}
-void ADRC_AttitudeControl::eso_init(ESO* eso_t, float beta1, float beta2, float alpha, float delta, float b0)
-{
-    eso_t->beta1 = beta1;
-    eso_t->beta2 = beta2;
-    eso_t->u = 0.0f;
-    eso_t->alpha = alpha;
-    eso_t->delta = delta;
-    eso_t->b0 = b0;
-
-    eso_t->z1 = eso_t->z2 = 0.0f;
-}
-void ADRC_AttitudeControl::eso(ESO* eso_t, float y, float dt)
-{
-    float e = eso_t->z1 - y;
-    float fe = fal(e, eso_t->alpha, eso_t->delta);
-
-    eso_t->z1 += dt*(eso_t->z2 + eso_t->b0*eso_t->u - eso_t->beta1*e);
-    eso_t->z2 -= dt*eso_t->beta2*fe;
-}
-void ADRC_AttitudeControl::leso_init(LESO* leso_t, float w, float b0)
-{
-    // (s + w)^2 = s^2 + beta_1 * s + beta_2
-    leso_t->beta1 = 2.0f*w;
-    leso_t->beta2 = w*w;
-    leso_t->u = 0.0f;
-    leso_t->b0 = b0;
-
-    leso_t->z1 = leso_t->z2 = 0.0f;
-}
-void ADRC_AttitudeControl::leso(LESO* leso_t, float y, float dt)
-{
-    float e = leso_t->z1 - y;
-
-    leso_t->z1 += dt*(leso_t->z2 + leso_t->b0*leso_t->u - leso_t->beta1*e);
-    leso_t->z2 -= dt*leso_t->beta2*e;
-}
-void ADRC_AttitudeControl::nlsef_init(NLSEF* nlsef_t, float r1, float h1, float c)
-{
-    nlsef_t->h1 = h1;
-    nlsef_t->r1 = r1;
-    nlsef_t->c = c;
-}
-float ADRC_AttitudeControl::nlsef(NLSEF* nlsef_t, float e1, float e2)
-{
-    float u0 = -fhan(e1, nlsef_t->c*e2, nlsef_t->r1, nlsef_t->h1);
-
-    return u0;
-}
 
 Vector3f ADRC_AttitudeControl::att_dis_comp(Vector2f in)
 {
@@ -185,10 +73,6 @@ Vector3f ADRC_AttitudeControl::att_control(Vector3f err, float dt)
     sp_rate(1) = td_control(&_td_controller[1], err(1), dt);
 
     return sp_rate;
-}
-void ADRC_AttitudeControl::add_observer_update(const float gyr[3], float bth)
-{
-
 }
 
 matrix::Vector3f ADRC_AttitudeControl::update(matrix::Quatf q, matrix::Quatf qd, const float yawspeed_feedforward, float dt)

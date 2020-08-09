@@ -128,7 +128,7 @@ private:
 	/**
 	 * Attitude controller.
 	 */
-    void		control_attitude(float dt, const matrix::Vector3f &rates);
+    void		control_attitude(float dt);
 
 	/**
 	 * Attitude rates controller.
